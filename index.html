@@ -2,180 +2,181 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusHost | Titanium Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NexusHost | Diamond Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Compression Library (Yeh zaroori hai) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --primary: #38bdf8; --text: #f1f5f9; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        :root { --bg: #050505; --card: #141414; --primary: #00dc82; --text: #fff; --border: #333; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* DASHBOARD UI */
+        #dashboard { padding: 15px; height: 100%; display: flex; flex-direction: column; max-width: 900px; margin: 0 auto; width: 100%; }
         
-        /* EDITOR SCREEN */
-        #dashboard { padding: 20px; height: 100%; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 100%; }
-        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
-        h1 { font-size: 1.5rem; color: var(--primary); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .badge { background: #333; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; }
+
+        .editor-container { flex: 1; display: flex; flex-direction: column; position: relative; }
         
         textarea {
-            flex: 1; background: #000; color: #4ade80; border: 1px solid #334155; 
-            padding: 15px; border-radius: 8px; resize: none; font-family: monospace; font-size: 14px;
+            flex: 1; background: var(--card); border: 1px solid var(--border); color: #ddd;
+            padding: 15px; border-radius: 8px; font-family: monospace; resize: none; font-size: 14px;
         }
+        textarea:focus { border-color: var(--primary); outline: none; }
+
+        .controls { margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        .controls { margin-top: 15px; display: grid; gap: 10px; }
         button {
-            padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
         }
-        .btn-gen { background: var(--primary); color: #000; }
-        .btn-copy { background: #475569; color: #fff; display: none; } /* Hidden initially */
+        .btn-main { background: var(--primary); color: #000; grid-column: span 2; }
+        .btn-copy { background: #333; color: #fff; }
+        .btn-open { background: #2563eb; color: #fff; }
         
-        /* VIEWER SCREEN (Iframe) */
-        #viewer-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: none; }
-        iframe { width: 100%; height: 100%; border: none; }
+        button:active { transform: scale(0.98); }
+
+        /* VIEWER UI */
+        #viewer-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #fff; z-index: 999; display: none; }
         
-        #edit-btn {
+        .floating-edit {
             position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background: #000; color: #fff; padding: 10px 20px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none;
+            background: #000; color: white; padding: 12px 25px; border-radius: 50px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 1px solid #333; display: none;
         }
 
-        .status { font-size: 0.8rem; margin-top: 5px; color: #ef4444; text-align: center; height: 20px; }
+        #msg { text-align: center; font-size: 0.8rem; margin-top: 10px; min-height: 20px; color: #888; }
     </style>
 </head>
 <body>
 
-    <!-- DASHBOARD -->
+    <!-- EDIT MODE -->
     <div id="dashboard">
-        <header>
-            <h1><i class="fas fa-cube"></i> NexusHost</h1>
-            <span style="font-size:0.8rem; opacity:0.7">Titanium v5.0</span>
-        </header>
+        <div class="header">
+            <div class="logo"><i class="fas fa-code-branch"></i> NexusHost</div>
+            <span class="badge">COMPRESSED V6</span>
+        </div>
 
-        <textarea id="code" placeholder="Paste your HTML code here..." spellcheck="false"></textarea>
-        <div class="status" id="status-msg"></div>
+        <div class="editor-container">
+            <textarea id="source" placeholder="Paste your HTML Code here... (Images should be external links like Imgur)" spellcheck="false"></textarea>
+        </div>
+
+        <div id="msg"></div>
 
         <div class="controls">
-            <button class="btn-gen" onclick="generateHashLink()">
-                <i class="fas fa-bolt"></i> Generate Secure Link
+            <button class="btn-main" onclick="createCompressedLink()">
+                <i class="fas fa-magic"></i> Generate Magic Link
             </button>
-            <button id="copy-btn" class="btn-copy" onclick="copyToClipboard()">
-                <i class="fas fa-copy"></i> Copy Link
+            <button id="btn-copy" class="btn-copy" onclick="copyLink()" style="display:none">
+                <i class="fas fa-copy"></i> Copy URL
             </button>
-            <button id="open-btn" class="btn-copy" onclick="openLive()" style="background:#22c55e">
-                <i class="fas fa-external-link-alt"></i> Open Site
+            <button id="btn-open" class="btn-open" onclick="openSite()" style="display:none">
+                <i class="fas fa-external-link-alt"></i> Open Live
             </button>
         </div>
     </div>
 
-    <!-- VIEWER -->
-    <div id="viewer-container">
-        <iframe id="site-frame"></iframe>
-        <button id="edit-btn" onclick="goHome()">✏️ Edit Code</button>
-    </div>
+    <!-- VIEW MODE -->
+    <iframe id="viewer-frame"></iframe>
+    <button class="floating-edit" id="edit-btn" onclick="exitView()">
+        <i class="fas fa-pen"></i> Edit Code
+    </button>
 
     <script>
-        // --- 1. INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            // Check if there is a Hash (#) in the URL
-            if (window.location.hash && window.location.hash.length > 10) {
-                renderSite();
+        // --- LOGIC START ---
+
+        // 1. Check URL on Load
+        window.onload = function() {
+            const hash = window.location.hash.substring(1); // Remove '#'
+            
+            if (hash && hash.length > 0) {
+                // If hash exists, try to decompress and show site
+                try {
+                    const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+                    if (decompressed) {
+                        showSite(decompressed);
+                    } else {
+                        showMsg("Link corrupted or empty.", "red");
+                    }
+                } catch (e) {
+                    showMsg("Error loading site.", "red");
+                }
             } else {
-                // Restore draft if exists
-                const draft = localStorage.getItem('nexus_draft');
-                if(draft) document.getElementById('code').value = draft;
-            }
-        });
-
-        // Listen for hash changes (if user clicks back button)
-        window.addEventListener('hashchange', () => {
-            if(!window.location.hash) {
-                document.getElementById('viewer-container').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'flex';
-            }
-        });
-
-        // --- 2. GENERATE LINK (New Hash Method) ---
-        function generateHashLink() {
-            const code = document.getElementById('code').value;
-            const status = document.getElementById('status-msg');
-
-            if (!code.trim()) {
-                status.innerText = "Error: Code cannot be empty.";
-                return;
-            }
-
-            // Save draft
-            localStorage.setItem('nexus_draft', code);
-
-            try {
-                // UTF-8 to Base64 (Safe Method)
-                const base64 = btoa(unescape(encodeURIComponent(code)));
-                
-                // Update URL with Hash (Browser won't send this to server, avoiding 414 errors)
-                const newUrl = `${window.location.origin}${window.location.pathname}#${base64}`;
-                
-                // Show Buttons
-                document.getElementById('copy-btn').style.display = 'flex';
-                document.getElementById('open-btn').style.display = 'flex';
-                status.style.color = '#4ade80';
-                status.innerText = "Link Generated! Use 'Copy Link' button.";
-                
-                // Store globally for copy button
-                window.generatedUrl = newUrl;
-
-            } catch (err) {
-                status.style.color = '#ef4444';
-                status.innerText = "Error: Code is too large or contains invalid characters.";
+                // Load Draft
+                const draft = localStorage.getItem('nexus_draft_v6');
+                if(draft) document.getElementById('source').value = draft;
             }
         }
 
-        // --- 3. RENDER SITE ---
-        function renderSite() {
-            try {
-                // Remove the '#' from the start
-                const hash = window.location.hash.substring(1); 
-                
-                // Decode
-                const htmlContent = decodeURIComponent(escape(atob(hash)));
+        // 2. Generate Link (With Compression)
+        function createCompressedLink() {
+            const code = document.getElementById('source').value;
+            if (!code.trim()) { showMsg("Code is empty!", "red"); return; }
 
-                // Hide Dashboard, Show Viewer
-                document.getElementById('dashboard').style.display = 'none';
-                const container = document.getElementById('viewer-container');
-                container.style.display = 'block';
-                document.getElementById('edit-btn').style.display = 'block';
+            showMsg("Compressing data...", "yellow");
 
-                // Inject Code
-                const frame = document.getElementById('site-frame');
-                const doc = frame.contentWindow.document;
-                doc.open();
-                doc.write(htmlContent);
-                doc.close();
+            setTimeout(() => {
+                try {
+                    // Compress Data using Library
+                    const compressed = LZString.compressToEncodedURIComponent(code);
+                    
+                    // Create URL
+                    const url = window.location.origin + window.location.pathname + "#" + compressed;
+                    
+                    // Save Draft
+                    localStorage.setItem('nexus_draft_v6', code);
+                    window.generatedUrl = url;
 
-            } catch (e) {
-                alert("Link broken or incomplete. Please recopy the full link.");
-                window.location.hash = ""; // Reset
-            }
+                    // Update UI
+                    document.getElementById('btn-copy').style.display = 'flex';
+                    document.getElementById('btn-open').style.display = 'flex';
+                    showMsg("Link Ready! It is now compressed & safe.", "#00dc82");
+
+                } catch (e) {
+                    showMsg("Code too big even for compression!", "red");
+                }
+            }, 200);
         }
 
-        // --- 4. UTILITIES ---
-        function copyToClipboard() {
-            if(window.generatedUrl) {
-                navigator.clipboard.writeText(window.generatedUrl).then(() => {
-                    alert("Link Copied! Share this with anyone.");
-                });
-            }
+        // 3. Render Site
+        function showSite(html) {
+            document.getElementById('dashboard').style.display = 'none';
+            const frame = document.getElementById('viewer-frame');
+            frame.style.display = 'block';
+            document.getElementById('edit-btn').style.display = 'block';
+
+            const doc = frame.contentWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
         }
 
-        function openLive() {
-            if(window.generatedUrl) {
-                window.open(window.generatedUrl, '_blank');
-            }
-        }
-
-        function goHome() {
-            // Clears hash and reloads dashboard
+        // 4. Exit View Mode
+        function exitView() {
+            // Remove hash without reloading
             history.pushState("", document.title, window.location.pathname + window.location.search);
-            document.getElementById('viewer-container').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'flex';
+            location.reload(); // Reload to get back to dashboard clean
+        }
+
+        // Utilities
+        function copyLink() {
+            if(window.generatedUrl) {
+                navigator.clipboard.writeText(window.generatedUrl).then(() => showMsg("Copied to clipboard!", "#00dc82"));
+            }
+        }
+
+        function openSite() {
+            if(window.generatedUrl) window.open(window.generatedUrl, '_blank');
+        }
+
+        function showMsg(text, color) {
+            const el = document.getElementById('msg');
+            el.innerText = text;
+            el.style.color = color;
         }
     </script>
 </body>
