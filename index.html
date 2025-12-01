@@ -2,181 +2,399 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NexusHost | Diamond Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusHost | Sapphire Edition</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Compression Library (Yeh zaroori hai) -->
+    
+    <!-- Essentials: Compression & QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        :root { --bg: #050505; --card: #141414; --primary: #00dc82; --text: #fff; --border: #333; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-
-        /* DASHBOARD UI */
-        #dashboard { padding: 15px; height: 100%; display: flex; flex-direction: column; max-width: 900px; margin: 0 auto; width: 100%; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .badge { background: #333; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; }
-
-        .editor-container { flex: 1; display: flex; flex-direction: column; position: relative; }
-        
-        textarea {
-            flex: 1; background: var(--card); border: 1px solid var(--border); color: #ddd;
-            padding: 15px; border-radius: 8px; font-family: monospace; resize: none; font-size: 14px;
+        :root {
+            --bg: #030014;
+            --glass: rgba(18, 18, 30, 0.8);
+            --border: rgba(100, 100, 255, 0.15);
+            --primary: #6366f1;
+            --accent: #a855f7;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text: #e2e8f0;
         }
-        textarea:focus { border-color: var(--primary); outline: none; }
 
-        .controls { margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        button {
-            padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
-            font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.15), transparent 40%);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo { font-weight: 700; font-size: 1.2rem; display: flex; gap: 10px; align-items: center; }
+        .logo i { color: var(--primary); }
+
+        .actions { display: flex; gap: 10px; }
+
+        .btn {
+            padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.05); color: white; cursor: pointer;
+            font-size: 0.85rem; font-weight: 500; display: flex; gap: 8px; align-items: center;
             transition: 0.2s;
         }
-        .btn-main { background: var(--primary); color: #000; grid-column: span 2; }
-        .btn-copy { background: #333; color: #fff; }
-        .btn-open { background: #2563eb; color: #fff; }
-        
-        button:active { transform: scale(0.98); }
+        .btn:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: #4f46e5; }
+        .mobile-only { display: none; }
 
-        /* VIEWER UI */
-        #viewer-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #fff; z-index: 999; display: none; }
+        /* --- WORKSPACE (Split Screen) --- */
+        .workspace { display: flex; height: calc(100vh - 60px); position: relative; }
         
-        .floating-edit {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background: #000; color: white; padding: 12px 25px; border-radius: 50px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 1px solid #333; display: none;
+        /* EDITOR SIDE */
+        .editor-pane { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); min-width: 0; }
+        
+        .code-wrapper { flex: 1; position: relative; display: flex; background: #0c0c16; overflow: hidden; }
+        
+        .line-numbers {
+            width: 45px; background: #08080f; color: #4b5563; text-align: right;
+            padding: 15px 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6;
+            border-right: 1px solid var(--border); user-select: none;
         }
 
-        #msg { text-align: center; font-size: 0.8rem; margin-top: 10px; min-height: 20px; color: #888; }
+        textarea {
+            flex: 1; background: transparent; border: none; color: #a5b4fc;
+            padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6;
+            resize: none; white-space: pre; overflow: auto;
+        }
+
+        /* PREVIEW SIDE */
+        .preview-pane { flex: 1; background: white; display: flex; flex-direction: column; min-width: 0; }
+        
+        iframe { flex: 1; border: none; width: 100%; height: 100%; }
+
+        .pane-header {
+            padding: 8px 15px; background: #1a1a24; font-size: 0.75rem; color: #94a3b8;
+            border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* --- MODALS & EXTRAS --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 1000; display: none; justify-content: center; align-items: center;
+        }
+        
+        .modal {
+            background: #111; border: 1px solid var(--border); padding: 30px; border-radius: 12px;
+            text-align: center; max-width: 400px; width: 90%; animation: popIn 0.3s ease;
+        }
+
+        #qrcode { margin: 20px auto; background: white; padding: 10px; border-radius: 8px; width: fit-content; }
+        
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white;
+            padding: 12px 24px; border-radius: 8px; font-weight: 600;
+            transform: translateY(100px); transition: 0.3s; z-index: 2000;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* HEALTH BAR */
+        .health-bar-container { height: 4px; background: #1f2937; width: 100%; }
+        .health-bar { height: 100%; width: 0%; background: var(--success); transition: 0.5s; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .workspace { flex-direction: column; }
+            .preview-pane { display: none; height: 100%; position: absolute; top: 0; left: 0; width: 100%; z-index: 50; }
+            .preview-pane.active { display: flex; }
+            .mobile-only { display: flex; }
+            .desktop-only { display: none; }
+            .logo span { display: none; }
+        }
+
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <!-- EDIT MODE -->
-    <div id="dashboard">
-        <div class="header">
-            <div class="logo"><i class="fas fa-code-branch"></i> NexusHost</div>
-            <span class="badge">COMPRESSED V6</span>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-gem"></i> <span>NEXUS</span>HOST
+        </div>
+        <div class="actions">
+            <button class="btn" onclick="loadTemplate()"><i class="fas fa-wand-magic-sparkles"></i> <span class="desktop-only">Template</span></button>
+            <button class="btn mobile-only" onclick="toggleMobileView()" id="view-toggle"><i class="fas fa-eye"></i> Preview</button>
+            <button class="btn btn-primary" onclick="generateLink()"><i class="fas fa-share-nodes"></i> Share</button>
+        </div>
+    </nav>
+    
+    <!-- LINK HEALTH BAR -->
+    <div class="health-bar-container">
+        <div class="health-bar" id="url-health" title="URL Capacity"></div>
+    </div>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+        
+        <!-- EDITOR -->
+        <div class="editor-pane">
+            <div class="pane-header">
+                <span><i class="fas fa-code"></i> SOURCE CODE</span>
+                <span id="char-count" style="font-size:0.7rem">0 chars</span>
+            </div>
+            <div class="code-wrapper">
+                <div class="line-numbers" id="lines">1</div>
+                <textarea id="editor" spellcheck="false" placeholder="<!-- Paste your HTML here -->"></textarea>
+            </div>
         </div>
 
-        <div class="editor-container">
-            <textarea id="source" placeholder="Paste your HTML Code here... (Images should be external links like Imgur)" spellcheck="false"></textarea>
+        <!-- PREVIEW -->
+        <div class="preview-pane" id="preview-box">
+            <div class="pane-header" style="background: #f1f5f9; color: #333; border-bottom: 1px solid #e2e8f0;">
+                <span><i class="fas fa-desktop"></i> LIVE PREVIEW</span>
+                <button onclick="toggleMobileView()" class="mobile-only" style="border:none; background:none; cursor:pointer"><i class="fas fa-times"></i> Close</button>
+            </div>
+            <iframe id="viewer"></iframe>
         </div>
+    </div>
 
-        <div id="msg"></div>
-
-        <div class="controls">
-            <button class="btn-main" onclick="createCompressedLink()">
-                <i class="fas fa-magic"></i> Generate Magic Link
+    <!-- SHARE MODAL -->
+    <div class="overlay" id="share-modal">
+        <div class="modal">
+            <h2 style="color:var(--text); margin-bottom: 10px;">Ready to Launch! 🚀</h2>
+            <p style="color:#94a3b8; font-size: 0.9rem;">Scan this QR or Copy the link below.</p>
+            
+            <div id="qrcode"></div>
+            
+            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:15px;" onclick="copyLink()">
+                <i class="fas fa-copy"></i> Copy Magic Link
             </button>
-            <button id="btn-copy" class="btn-copy" onclick="copyLink()" style="display:none">
-                <i class="fas fa-copy"></i> Copy URL
-            </button>
-            <button id="btn-open" class="btn-open" onclick="openSite()" style="display:none">
-                <i class="fas fa-external-link-alt"></i> Open Live
+            <button class="btn" style="width:100%; justify-content:center; margin-top:10px;" onclick="closeModal()">
+                Close
             </button>
         </div>
     </div>
 
-    <!-- VIEW MODE -->
-    <iframe id="viewer-frame"></iframe>
-    <button class="floating-edit" id="edit-btn" onclick="exitView()">
-        <i class="fas fa-pen"></i> Edit Code
-    </button>
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast">Link Copied!</div>
 
     <script>
-        // --- LOGIC START ---
+        // --- VARS ---
+        const editor = document.getElementById('editor');
+        const lines = document.getElementById('lines');
+        const viewer = document.getElementById('viewer');
+        const healthBar = document.getElementById('url-health');
+        
+        let isPreviewOpen = false;
 
-        // 1. Check URL on Load
-        window.onload = function() {
-            const hash = window.location.hash.substring(1); // Remove '#'
-            
-            if (hash && hash.length > 0) {
-                // If hash exists, try to decompress and show site
+        // --- INIT ---
+        window.onload = () => {
+            const hash = window.location.hash.substring(1);
+            if(hash) {
+                // If viewing a link, decompress and show
                 try {
-                    const decompressed = LZString.decompressFromEncodedURIComponent(hash);
-                    if (decompressed) {
-                        showSite(decompressed);
-                    } else {
-                        showMsg("Link corrupted or empty.", "red");
+                    const decoded = LZString.decompressFromEncodedURIComponent(hash);
+                    if(decoded) {
+                        editor.value = decoded;
+                        updatePreview();
+                        // If mobile, switch to preview immediately
+                        if(window.innerWidth < 768) toggleMobileView();
                     }
-                } catch (e) {
-                    showMsg("Error loading site.", "red");
-                }
+                } catch(e) { console.error("Link broken"); }
             } else {
-                // Load Draft
-                const draft = localStorage.getItem('nexus_draft_v6');
-                if(draft) document.getElementById('source').value = draft;
+                // Load local draft
+                const saved = localStorage.getItem('nexus_sapphire');
+                if(saved) editor.value = saved;
+                else loadTemplate();
             }
+            updateEditorStats();
+        };
+
+        // --- EDITOR LOGIC ---
+        editor.addEventListener('input', () => {
+            updateEditorStats();
+            updatePreview(); // Auto-update preview
+            localStorage.setItem('nexus_sapphire', editor.value);
+        });
+
+        // Tab Key Support
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.execCommand('insertText', false, '    ');
+            }
+        });
+
+        // Sync Line Numbers
+        editor.addEventListener('scroll', () => {
+            lines.scrollTop = editor.scrollTop;
+        });
+
+        function updateEditorStats() {
+            // Line numbers
+            const lineCount = editor.value.split('\n').length;
+            lines.innerHTML = Array(lineCount).fill(0).map((_, i) => i + 1).join('<br>');
+            
+            // Char count & Health Bar
+            const len = editor.value.length;
+            document.getElementById('char-count').innerText = len + " chars";
+
+            // Estimated compressed size percentage (Assuming safe URL limit ~4000 chars for good compatibility)
+            // Real limit is higher, but we play safe.
+            const estimatedCompressed = Math.floor((len * 0.4)); // Rough estimate of LZ compression
+            const safeLimit = 5000; 
+            const percentage = Math.min((estimatedCompressed / safeLimit) * 100, 100);
+            
+            healthBar.style.width = percentage + "%";
+            
+            if(percentage > 90) healthBar.style.backgroundColor = "var(--danger)";
+            else if(percentage > 70) healthBar.style.backgroundColor = "orange";
+            else healthBar.style.backgroundColor = "var(--success)";
         }
 
-        // 2. Generate Link (With Compression)
-        function createCompressedLink() {
-            const code = document.getElementById('source').value;
-            if (!code.trim()) { showMsg("Code is empty!", "red"); return; }
-
-            showMsg("Compressing data...", "yellow");
-
-            setTimeout(() => {
-                try {
-                    // Compress Data using Library
-                    const compressed = LZString.compressToEncodedURIComponent(code);
-                    
-                    // Create URL
-                    const url = window.location.origin + window.location.pathname + "#" + compressed;
-                    
-                    // Save Draft
-                    localStorage.setItem('nexus_draft_v6', code);
-                    window.generatedUrl = url;
-
-                    // Update UI
-                    document.getElementById('btn-copy').style.display = 'flex';
-                    document.getElementById('btn-open').style.display = 'flex';
-                    showMsg("Link Ready! It is now compressed & safe.", "#00dc82");
-
-                } catch (e) {
-                    showMsg("Code too big even for compression!", "red");
-                }
-            }, 200);
-        }
-
-        // 3. Render Site
-        function showSite(html) {
-            document.getElementById('dashboard').style.display = 'none';
-            const frame = document.getElementById('viewer-frame');
-            frame.style.display = 'block';
-            document.getElementById('edit-btn').style.display = 'block';
-
-            const doc = frame.contentWindow.document;
+        // --- PREVIEW LOGIC ---
+        function updatePreview() {
+            const content = editor.value;
+            const doc = viewer.contentWindow.document;
             doc.open();
-            doc.write(html);
+            doc.write(content);
             doc.close();
         }
 
-        // 4. Exit View Mode
-        function exitView() {
-            // Remove hash without reloading
-            history.pushState("", document.title, window.location.pathname + window.location.search);
-            location.reload(); // Reload to get back to dashboard clean
-        }
-
-        // Utilities
-        function copyLink() {
-            if(window.generatedUrl) {
-                navigator.clipboard.writeText(window.generatedUrl).then(() => showMsg("Copied to clipboard!", "#00dc82"));
+        function toggleMobileView() {
+            const box = document.getElementById('preview-box');
+            isPreviewOpen = !isPreviewOpen;
+            
+            if(isPreviewOpen) {
+                box.classList.add('active');
+                document.getElementById('view-toggle').innerHTML = '<i class="fas fa-pen"></i> Edit';
+            } else {
+                box.classList.remove('active');
+                document.getElementById('view-toggle').innerHTML = '<i class="fas fa-eye"></i> Preview';
             }
         }
 
-        function openSite() {
-            if(window.generatedUrl) window.open(window.generatedUrl, '_blank');
+        // --- SHARE LOGIC ---
+        function generateLink() {
+            const code = editor.value;
+            if(!code.trim()) { showToast("Code is empty!", true); return; }
+
+            try {
+                const compressed = LZString.compressToEncodedURIComponent(code);
+                const url = window.location.origin + window.location.pathname + "#" + compressed;
+                
+                // Generate QR
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = ""; // Clear old
+                new QRCode(qrContainer, {
+                    text: url,
+                    width: 150,
+                    height: 150,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.L
+                });
+
+                document.getElementById('share-modal').style.display = 'flex';
+                window.generatedUrl = url;
+
+            } catch(e) {
+                showToast("Error generating link", true);
+            }
         }
 
-        function showMsg(text, color) {
-            const el = document.getElementById('msg');
-            el.innerText = text;
-            el.style.color = color;
+        function copyLink() {
+            if(window.generatedUrl) {
+                navigator.clipboard.writeText(window.generatedUrl).then(() => {
+                    showToast("Link Copied!");
+                });
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('share-modal').style.display = 'none';
+        }
+
+        // --- UTILS ---
+        function loadTemplate() {
+            editor.value = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+    body { 
+        background: #0f172a; 
+        color: white; 
+        font-family: system-ui, sans-serif; 
+        height: 100vh; 
+        display: grid; 
+        place-items: center; 
+        margin: 0;
+    }
+    .card {
+        background: #1e293b;
+        padding: 40px;
+        border-radius: 20px;
+        border: 1px solid #334155;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    h1 { margin: 0; background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; color: transparent; }
+    p { color: #94a3b8; }
+    button {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+</style>
+</head>
+<body>
+    <div class="card">
+        <h1>NexusHost Sapphire</h1>
+        <p>Edit this code on the left to see changes instantly!</p>
+        <button onclick="alert('System Operational!')">Click Me</button>
+    </div>
+</body>
+</html>`;
+            updateEditorStats();
+            updatePreview();
+        }
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.background = isError ? "var(--danger)" : "var(--success)";
+            t.style.transform = "translateY(0)";
+            setTimeout(() => t.style.transform = "translateY(100px)", 3000);
         }
     </script>
 </body>
