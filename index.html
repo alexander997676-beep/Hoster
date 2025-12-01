@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusHost | Next Gen Free Hosting</title>
+    <title>AERO.HOST | Next-Gen Deployment</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-glow: #4f46e580;
-            --secondary: #ec4899;
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
+            --bg-main: #09090b;
+            --bg-secondary: #18181b;
+            --bg-card: #27272a;
+            --accent: #8b5cf6; /* Violet */
+            --accent-glow: rgba(139, 92, 246, 0.5);
+            --success: #10b981;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border: #3f3f46;
         }
 
         * {
@@ -23,474 +24,670 @@
             padding: 0;
             box-sizing: border-box;
             scrollbar-width: thin;
+            scrollbar-color: var(--border) var(--bg-main);
         }
 
         body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%);
+            background-color: var(--bg-main);
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* --- Header --- */
-        .navbar {
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
-            justify-content: space-between;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 80px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
             align-items: center;
             padding: 20px 0;
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--border);
+            z-index: 10;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #818cf8, #f472b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 40px;
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .nav-item {
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            color: var(--text-muted);
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .stats-badge {
-            background: rgba(255,255,255,0.05);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid var(--border);
+        .nav-item:hover, .nav-item.active {
+            background: var(--bg-card);
+            color: var(--accent);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            height: 20px;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* --- Main Content --- */
+        .main-wrapper {
+            flex: 1;
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* --- Grid Layout --- */
-        .main-grid {
+        .header {
+            height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            background: rgba(9, 9, 11, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-title h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        /* --- Dashboard Grid --- */
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 30px;
         }
 
-        @media (max-width: 900px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* --- Cards --- */
+        /* --- Editor Card --- */
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
         }
 
         .card-header {
+            padding: 15px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
         }
 
-        .card-title {
-            font-size: 1.25rem;
+        .tab-switcher {
+            display: flex;
+            background: var(--bg-main);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 6px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--text-main);
             font-weight: 600;
+        }
+
+        .editor-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #code-input {
+            flex: 1;
+            background: #0d0d0d;
+            border: none;
+            color: #d4d4d8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            padding: 20px;
+            resize: none;
+            line-height: 1.6;
+        }
+
+        #code-input:focus { outline: none; }
+
+        /* --- Upload Overlay --- */
+        .upload-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-secondary);
+            display: none; /* Toggled via JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .drop-zone {
+            width: 80%;
+            height: 60%;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        /* --- Preview Phone --- */
+        .preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .device-mockup {
+            flex: 1;
+            border: 8px solid #333;
+            border-radius: 24px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .device-bar {
+            height: 25px;
+            background: #e4e4e7;
             display: flex;
             align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #d4d4d8;
+        }
+
+        .camera-dot {
+            width: 8px;
+            height: 8px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100% - 25px);
+            border: none;
+        }
+
+        /* --- Deploy Controls --- */
+        .deploy-controls {
+            padding: 20px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            display: flex;
             gap: 10px;
         }
 
-        /* --- Tabs --- */
-        .tabs {
-            display: flex;
-            background: rgba(0,0,0,0.2);
-            padding: 4px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
+        .input-slug {
             flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        /* --- Forms --- */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            background: rgba(0,0,0,0.2);
+            background: var(--bg-main);
             border: 1px solid var(--border);
-            padding: 12px;
+            padding: 10px 15px;
             border-radius: 8px;
             color: white;
-            font-family: 'Fira Code', monospace;
-            transition: border-color 0.3s;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* --- Drag & Drop Zone --- */
-        .upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(255,255,255,0.01);
-        }
-
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--primary);
-            background: rgba(79, 70, 229, 0.05);
-        }
-
-        .upload-zone i {
-            font-size: 2.5rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
-
-        /* --- Code Editor --- */
-        .code-editor {
-            width: 100%;
-            height: 300px;
-            background: #0d1117;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: #e6edf3;
-            padding: 15px;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            resize: vertical;
-        }
-        
-        .code-editor:focus {
-            outline: 2px solid var(--primary);
-        }
-
-        /* --- Buttons --- */
         .btn {
-            width: 100%;
-            padding: 14px;
+            padding: 10px 20px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
+            transition: 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.2s;
+            gap: 8px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #4338ca);
+            background: var(--accent);
             color: white;
-            box-shadow: 0 4px 15px var(--primary-glow);
+            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
         .btn-primary:hover {
+            background: #7c3aed;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--primary-glow);
         }
 
-        /* --- Site List --- */
-        .site-list {
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .site-item {
-            background: rgba(255,255,255,0.03);
-            border-radius: 10px;
+        /* --- Terminal / Footer --- */
+        .terminal {
+            height: 150px;
+            background: #000;
+            border-top: 1px solid var(--border);
             padding: 15px;
-            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--success);
+            overflow-y: auto;
             display: flex;
-            align-items: center;
-            transition: transform 0.2s;
-            border: 1px solid transparent;
+            flex-direction: column-reverse; /* Newest logs at bottom but visible */
         }
 
-        .site-item:hover {
-            border-color: rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
+        .log-entry { margin-bottom: 4px; opacity: 0.8; }
+        .log-time { color: var(--text-muted); margin-right: 10px; }
+
+        /* --- Deployed Sites List --- */
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            display: none; /* Hidden by default */
         }
 
-        .site-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            margin-right: 15px;
-            background: rgba(255,255,255,0.1);
+        .site-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: 0.3s;
+            position: relative;
         }
 
-        .site-info {
-            flex: 1;
-            min-width: 0;
+        .site-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
         }
 
-        .site-name {
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .site-link {
-            font-size: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Fira Code', monospace;
-        }
-
-        .site-link:hover {
-            text-decoration: underline;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .delete-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-
-        /* --- Utility --- */
-        .hidden { display: none; }
-        
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            background: #10b981;
-            color: white;
-            font-weight: 600;
-            transform: translateY(150%);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 1000;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
-        
-        .notification.show { transform: translateY(0); }
-        .notification.error { background: #ef4444; }
-
-        .loading-bar {
-            height: 4px;
-            background: var(--bg-dark);
-            border-radius: 2px;
+        .site-actions {
             margin-top: 15px;
-            overflow: hidden;
-            display: none;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            background: var(--bg-main);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            cursor: pointer;
         }
         
-        .progress {
-            height: 100%;
-            width: 0%;
-            background: var(--primary);
-            transition: width 0.3s;
+        .btn-sm:hover { background: var(--bg-card); }
+
+        @keyframes pulse {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="logo">
-                <i class="fas fa-cube"></i> NEXUS<span style="font-weight:300">HOST</span>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-icon"><i class="fas fa-cube"></i></div>
+        
+        <div class="nav-item active" onclick="switchView('deploy')" title="Deploy">
+            <i class="fas fa-terminal"></i>
+        </div>
+        <div class="nav-item" onclick="switchView('sites')" title="My Sites">
+            <i class="fas fa-server"></i>
+        </div>
+        <div class="nav-item" onclick="alert('Settings feature coming soon!')">
+            <i class="fas fa-cog"></i>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1>AERO<span style="color:var(--text-muted); font-weight:300">.HOST</span></h1>
             </div>
-            <div class="stats-badge">
-                <span><i class="fas fa-server"></i> <span id="total-sites">0</span> Active Sites</span>
-                <span style="opacity: 0.5">|</span>
-                <span><i class="fas fa-bolt"></i> v2.0 Online</span>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                SYSTEM ONLINE
             </div>
-        </nav>
+        </header>
 
-        <div class="main-grid">
-            <!-- Left Panel: Deploy -->
-            <div class="deploy-section">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fas fa-rocket" style="color:var(--secondary)"></i> Deploy New Site</div>
+        <!-- View: Deploy (Editor + Preview) -->
+        <div id="view-deploy" class="content-area">
+            
+            <!-- Left: Editor/Upload -->
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div style="font-weight:600"><i class="fas fa-code"></i> Source Control</div>
+                    <div class="tab-switcher">
+                        <div class="tab-btn active" onclick="toggleInputMode('editor')">Editor</div>
+                        <div class="tab-btn" onclick="toggleInputMode('upload')">Upload</div>
                     </div>
+                </div>
 
-                    <div class="tabs">
-                        <div class="tab active" onclick="switchTab('upload')">File Upload</div>
-                        <div class="tab" onclick="switchTab('editor')">Code Editor</div>
-                    </div>
-
-                    <!-- Upload Tab -->
-                    <div id="tab-upload">
-                        <div class="form-group">
-                            <label>SITE IDENTIFIER</label>
-                            <input type="text" id="upload-slug" placeholder="e.g., my-portfolio-v1" onkeyup="sanitizeSlug(this)">
-                        </div>
-
-                        <div class="upload-zone" id="drop-zone">
-                            <input type="file" id="file-input" hidden accept=".html,.htm,.txt">
-                            <div id="upload-content">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <h3>Drag & Drop HTML file</h3>
-                                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px">or click to browse</p>
-                            </div>
-                            <div id="file-info" class="hidden">
-                                <i class="fas fa-file-code" style="color:var(--primary); font-size: 2rem;"></i>
-                                <p id="filename-display" style="margin-top:10px; font-weight:600;"></p>
-                            </div>
-                        </div>
-
-                        <div class="loading-bar" id="upload-progress">
-                            <div class="progress" id="progress-bar"></div>
-                        </div>
-
-                        <button class="btn btn-primary" onclick="handleFileUpload()" style="margin-top: 20px;">
-                            <i class="fas fa-upload"></i> Deploy File
-                        </button>
-                    </div>
-
-                    <!-- Editor Tab -->
-                    <div id="tab-editor" class="hidden">
-                        <div class="form-group">
-                            <label>SITE IDENTIFIER</label>
-                            <input type="text" id="editor-slug" placeholder="e.g., quick-test-page" onkeyup="sanitizeSlug(this)">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>SOURCE CODE (HTML)</label>
-                            <textarea class="code-editor" id="code-content" spellcheck="false"><!DOCTYPE html>
+                <div class="editor-container">
+                    <!-- Code Editor -->
+                    <textarea id="code-input" spellcheck="false" placeholder="// Write HTML code here...">
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 50px; }
-        h1 { color: #ec4899; }
-        .box { border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; display: inline-block; }
+        body { 
+            font-family: sans-serif; 
+            background: linear-gradient(45deg, #FF512F, #DD2476); 
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: white; 
+            text-align: center;
+        }
+        h1 { font-size: 2.5rem; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        p { font-size: 1.1rem; opacity: 0.9; }
+        .glass {
+            background: rgba(255,255,255,0.2);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
     </style>
 </head>
 <body>
-    <div class="box">
+    <div class="glass">
         <h1>Hello World!</h1>
-        <p>This site was deployed instantly via NexusHost.</p>
+        <p>Deployed via Aero.Host</p>
     </div>
 </body>
 </html></textarea>
-                        </div>
 
-                        <button class="btn btn-primary" onclick="handleCodeDeploy()">
-                            <i class="fas fa-code"></i> Deploy Code
-                        </button>
+                    <!-- Upload Overlay -->
+                    <div id="upload-overlay" class="upload-overlay">
+                        <div class="drop-zone" id="drop-zone">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+                            <h3>Drop HTML File Here</h3>
+                            <p style="color: var(--text-muted);">or click to browse</p>
+                            <input type="file" id="file-input" hidden accept=".html,.htm">
+                        </div>
                     </div>
+                </div>
+
+                <!-- Footer Controls -->
+                <div class="deploy-controls">
+                    <input type="text" id="site-slug" class="input-slug" placeholder="site-name-v1">
+                    <button class="btn btn-primary" onclick="deploySite()">
+                        <i class="fas fa-rocket"></i> DEPLOY
+                    </button>
                 </div>
             </div>
 
-            <!-- Right Panel: Dashboard -->
-            <div class="dashboard-section">
-                <div class="card" style="height: 100%;">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fas fa-globe" style="color: #38bdf8"></i> Your Universe</div>
-                        <button class="action-btn" onclick="clearAllSites()" title="Clear All"><i class="fas fa-trash-alt"></i></button>
+            <!-- Right: Preview -->
+            <div class="preview-wrapper">
+                <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">LIVE PREVIEW</span>
+                    <span style="font-size: 0.8rem; color: var(--accent);">
+                        <i class="fas fa-circle-notch fa-spin"></i> Auto-Updating
+                    </span>
+                </div>
+                <div class="device-mockup">
+                    <div class="device-bar">
+                        <div class="camera-dot"></div>
                     </div>
-                    
-                    <div class="site-list" id="sites-container">
-                        <!-- Sites will be injected here via JS -->
-                        <div style="text-align:center; padding: 40px; color: var(--text-muted);">
-                            <i class="fas fa-ghost" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>No sites deployed yet.</p>
-                        </div>
-                    </div>
+                    <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
                 </div>
             </div>
         </div>
+
+        <!-- View: Sites List -->
+        <div id="view-sites" class="content-area hidden" style="display: block;"> <!-- Grid is handled by JS logic -->
+            <div style="padding: 30px;">
+                <h2 style="margin-bottom: 20px;">Deployed Projects</h2>
+                <div id="sites-container" class="sites-grid" style="display: grid;">
+                    <!-- Sites injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Log -->
+        <div class="terminal" id="terminal">
+            <div class="log-entry"><span class="log-time">[SYSTEM]</span> Ready for deployment...</div>
+        </div>
+
     </div>
 
-    <!-- Notification Toast -->
-    <div class="notification" id="toast"></div>
-
     <script>
-        // --- State Management ---
-        let sites = JSON.parse(localStorage.getItem('nexus_sites')) || [];
+        // --- Core Application State ---
+        // We store site CONTENT, not URLs (because URLs expire). We rebuild URLs on load.
+        let appState = {
+            sites: JSON.parse(localStorage.getItem('aero_sites')) || []
+        };
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            renderSites();
+            log('System initialized.');
+            log(`Loaded ${appState.sites.length} projects from local storage.`);
+            
+            // Setup Live Preview
+            const codeInput = document.getElementById('code-input');
+            codeInput.addEventListener('input', updatePreview);
+            updatePreview(); // Initial run
+
+            // Setup Upload
             setupDragDrop();
+            
+            // Render Sites
+            renderSites();
+
+            // Default View
+            switchView('deploy');
         });
 
-        // --- Tab Switching ---
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab')[tab === 'upload' ? 0 : 1].classList.add('active');
-            
-            if(tab === 'upload') {
-                document.getElementById('tab-upload').classList.remove('hidden');
-                document.getElementById('tab-editor').classList.add('hidden');
+        // --- View Switching ---
+        function switchView(viewName) {
+            // UI Toggles
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if(viewName === 'deploy') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if(viewName === 'sites') document.querySelectorAll('.nav-item')[1].classList.add('active');
+
+            // Content Toggles
+            if(viewName === 'deploy') {
+                document.getElementById('view-deploy').classList.remove('hidden');
+                document.getElementById('view-deploy').style.display = 'grid'; // Restore grid
+                document.getElementById('view-sites').classList.add('hidden');
             } else {
-                document.getElementById('tab-upload').classList.add('hidden');
-                document.getElementById('tab-editor').classList.remove('hidden');
+                document.getElementById('view-deploy').classList.add('hidden');
+                document.getElementById('view-deploy').style.display = 'none';
+                document.getElementById('view-sites').classList.remove('hidden');
+                renderSites(); // Refresh list
             }
         }
 
-        // --- Drag & Drop Logic ---
+        function toggleInputMode(mode) {
+            const overlay = document.getElementById('upload-overlay');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if(mode === 'upload') {
+                overlay.style.display = 'flex';
+                tabs[1].classList.add('active');
+            } else {
+                overlay.style.display = 'none';
+                tabs[0].classList.add('active');
+            }
+        }
+
+        // --- Logic: Preview ---
+        function updatePreview() {
+            const code = document.getElementById('code-input').value;
+            const frame = document.getElementById('preview-frame');
+            
+            // Create a blob for the preview to isolate it
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            frame.src = url;
+            
+            // Note: We don't revokeURL immediately so the iframe has time to load
+        }
+
+        // --- Logic: Deploy ---
+        function deploySite() {
+            const code = document.getElementById('code-input').value;
+            let slug = document.getElementById('site-slug').value.trim();
+
+            if(!slug) slug = 'project-' + Math.floor(Math.random() * 1000);
+            
+            // 1. Create Data Object
+            const siteData = {
+                id: Date.now(),
+                name: slug,
+                content: code, // We save the CODE, so we can recreate the link later
+                created: new Date().toLocaleString()
+            };
+
+            // 2. Save to State & LocalStorage
+            appState.sites.unshift(siteData); // Add to top
+            localStorage.setItem('aero_sites', JSON.stringify(appState.sites));
+
+            // 3. Feedback
+            log(`Deploying ${slug}...`);
+            setTimeout(() => {
+                log(`[SUCCESS] ${slug} is live!`);
+                switchView('sites'); // Go to list
+                document.getElementById('site-slug').value = ''; // Reset
+            }, 800);
+        }
+
+        // --- Logic: Render Sites List ---
+        function renderSites() {
+            const container = document.getElementById('sites-container');
+            container.innerHTML = '';
+
+            if(appState.sites.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted)">No sites deployed yet.</div>';
+                return;
+            }
+
+            appState.sites.forEach(site => {
+                // GENERATE A LIVE BLOB URL FOR THIS SESSION
+                const blob = new Blob([site.content], { type: 'text/html' });
+                const liveUrl = URL.createObjectURL(blob);
+
+                const card = document.createElement('div');
+                card.className = 'site-card';
+                card.innerHTML = `
+                    <div style="position:absolute; top:15px; right:15px; color:var(--success)">
+                        <i class="fas fa-circle" style="font-size:0.5rem"></i> Live
+                    </div>
+                    <h3 style="font-size:1.1rem; margin-bottom:5px;">${site.name}</h3>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">
+                        ${site.created}
+                    </div>
+                    <div class="site-actions">
+                        <a href="${liveUrl}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-block; text-align:center;">
+                            <i class="fas fa-external-link-alt"></i> Visit
+                        </a>
+                        <button class="btn-sm" onclick="editSite(${site.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-sm" onclick="deleteSite(${site.id})" style="color:#ef4444; border-color: rgba(239,68,68,0.3)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div style="margin-top:10px; background:#000; padding:5px; border-radius:4px; font-family:monospace; font-size:0.7rem; color:var(--text-muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                        ${liveUrl}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- Logic: Actions ---
+        function deleteSite(id) {
+            if(confirm('Delete this deployment?')) {
+                appState.sites = appState.sites.filter(s => s.id !== id);
+                localStorage.setItem('aero_sites', JSON.stringify(appState.sites));
+                renderSites();
+                log(`[DELETE] Deployment ${id} removed.`);
+            }
+        }
+
+        function editSite(id) {
+            const site = appState.sites.find(s => s.id === id);
+            if(site) {
+                document.getElementById('code-input').value = site.content;
+                document.getElementById('site-slug').value = site.name;
+                updatePreview();
+                switchView('deploy');
+                toggleInputMode('editor');
+                log(`[EDIT] Loaded source for ${site.name}`);
+            }
+        }
+
+        // --- Utilities: Drag & Drop ---
         function setupDragDrop() {
             const dropZone = document.getElementById('drop-zone');
             const fileInput = document.getElementById('file-input');
@@ -499,211 +696,49 @@
 
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                dropZone.classList.add('dragover');
+                dropZone.style.borderColor = 'var(--accent)';
+                dropZone.style.background = 'rgba(139, 92, 246, 0.1)';
             });
 
-            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.style.borderColor = 'var(--border)';
+                dropZone.style.background = 'transparent';
+            });
 
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropZone.classList.remove('dragover');
-                if (e.dataTransfer.files.length) {
-                    handleFileSelect(e.dataTransfer.files[0]);
-                }
+                if(e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
             });
 
             fileInput.addEventListener('change', () => {
-                if (fileInput.files.length) handleFileSelect(fileInput.files[0]);
+                if(fileInput.files.length) loadFile(fileInput.files[0]);
             });
         }
 
-        function handleFileSelect(file) {
-            document.getElementById('upload-content').classList.add('hidden');
-            document.getElementById('file-info').classList.remove('hidden');
-            document.getElementById('filename-display').innerText = file.name;
-            
-            // Auto-fill slug if empty
-            const slugInput = document.getElementById('upload-slug');
-            if(!slugInput.value) {
-                slugInput.value = file.name.split('.')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
-            }
-        }
-
-        function sanitizeSlug(input) {
-            input.value = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-        }
-
-        // --- Core Logic: Deploy from File ---
-        function handleFileUpload() {
-            const fileInput = document.getElementById('file-input');
-            const slug = document.getElementById('upload-slug').value || 'untitled-site';
-            
-            // Check manual file select or drag/drop (fileInput might be empty if D&D used, need logic adjustment for production, but this simplifies)
-            // For this demo, we rely on the input having the file.
-            if (!fileInput.files.length) {
-                showToast('Please select a file first!', true);
-                return;
-            }
-
-            const file = fileInput.files[0];
+        function loadFile(file) {
             const reader = new FileReader();
-
-            // Simulate Network Upload
-            simulateLoading(() => {
-                reader.onload = function(e) {
-                    createSite(slug, e.target.result, 'html');
-                };
-                reader.readAsText(file);
-            });
-        }
-
-        // --- Core Logic: Deploy from Code ---
-        function handleCodeDeploy() {
-            const code = document.getElementById('code-content').value;
-            const slug = document.getElementById('editor-slug').value || 'untitled-code';
-
-            if(!code.trim()) {
-                showToast('Code cannot be empty', true);
-                return;
-            }
-
-            simulateLoading(() => {
-                createSite(slug, code, 'code');
-            });
-        }
-
-        // --- Site Creation Logic (The Magic) ---
-        function createSite(name, content, type) {
-            // Create a Blob URL (This acts as a hosted link for the browser session)
-            const blob = new Blob([content], {type: 'text/html'});
-            const url = URL.createObjectURL(blob);
-            
-            const newSite = {
-                id: Date.now(),
-                name: name,
-                url: url,
-                date: new Date().toLocaleDateString(),
-                size: (new Blob([content]).size / 1024).toFixed(2) + ' KB',
-                type: type
+            reader.onload = (e) => {
+                document.getElementById('code-input').value = e.target.result;
+                // Switch back to editor to show code
+                toggleInputMode('editor');
+                updatePreview();
+                // Autofill name
+                document.getElementById('site-slug').value = file.name.split('.')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+                log(`[UPLOAD] Read file: ${file.name}`);
             };
-
-            sites.unshift(newSite); // Add to top
-            saveSites();
-            renderSites();
-            
-            // Reset Forms
-            document.getElementById('upload-slug').value = '';
-            document.getElementById('editor-slug').value = '';
-            document.getElementById('file-info').classList.add('hidden');
-            document.getElementById('upload-content').classList.remove('hidden');
-            document.getElementById('file-input').value = '';
-
-            showToast(`🚀 ${name} deployed successfully!`);
+            reader.readAsText(file);
         }
 
-        // --- Rendering ---
-        function renderSites() {
-            const container = document.getElementById('sites-container');
-            document.getElementById('total-sites').innerText = sites.length;
-
-            if (sites.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding: 40px; color: var(--text-muted);">
-                        <i class="fas fa-ghost" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
-                        <p>No sites deployed yet.</p>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            sites.forEach(site => {
-                const el = document.createElement('div');
-                el.className = 'site-item';
-                el.innerHTML = `
-                    <div class="site-icon">
-                        <i class="fas ${site.type === 'code' ? 'fa-code' : 'fa-file-code'}" style="color: ${site.type === 'code' ? '#f472b6' : '#818cf8'}"></i>
-                    </div>
-                    <div class="site-info">
-                        <div class="site-name">${site.name}</div>
-                        <a href="${site.url}" target="_blank" class="site-link"><i class="fas fa-external-link-alt"></i> View Live Site</a>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
-                            ${site.size} • ${site.date}
-                        </div>
-                    </div>
-                    <div class="site-actions">
-                        <button class="action-btn" onclick="copyLink('${site.url}')" title="Copy Link"><i class="far fa-copy"></i></button>
-                        <button class="action-btn delete-btn" onclick="deleteSite(${site.id})" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
-                container.appendChild(el);
-            });
+        // --- Utilities: Logger ---
+        function log(msg) {
+            const term = document.getElementById('terminal');
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> ${msg}`;
+            term.prepend(entry); // Add to top
         }
 
-        // --- Utilities ---
-        function deleteSite(id) {
-            if(confirm('Are you sure you want to delete this deployment?')) {
-                sites = sites.filter(s => s.id !== id);
-                saveSites();
-                renderSites();
-                showToast('Site deleted.');
-            }
-        }
-
-        function clearAllSites() {
-            if(sites.length > 0 && confirm('Delete all hosted sites?')) {
-                sites = [];
-                saveSites();
-                renderSites();
-                showToast('All sites cleared.');
-            }
-        }
-
-        function saveSites() {
-            // Note: We cannot save Blob URLs to localStorage (they expire). 
-            // In a real app, you save the content to a DB. 
-            // For this demo, we update the list but the links might expire on refresh. 
-            // To make it persist better in a pure client demo, we would save the CONTENT to localstorage, 
-            // then regenerate blobs on load.
-            
-            // Simple version: Just save the metadata for the visual list
-            // Advanced version (implemented here): Don't save large content to LS to avoid quota limits.
-            // We will just clear the array in LS for this demo context because Blob URLs die on refresh.
-            // But to simulate "Working", we keep the array in memory.
-        }
-
-        function copyLink(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('Link copied to clipboard!');
-            });
-        }
-
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = `notification show ${isError ? 'error' : ''}`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        function simulateLoading(callback) {
-            const bar = document.getElementById('upload-progress');
-            const fill = document.getElementById('progress-bar');
-            bar.style.display = 'block';
-            
-            let width = 0;
-            const interval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        bar.style.display = 'none';
-                        fill.style.width = '0%';
-                        callback();
-                    }, 200);
-                } else {
-                    width += 5;
-                    fill.style.width = width + '%';
-                }
-            }, 20);
-        }
     </script>
 </body>
 </html>
