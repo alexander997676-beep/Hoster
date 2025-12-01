@@ -3,254 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusHost | Permanent Magic Hosting</title>
+    <title>NexusHost | Titanium Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS RESET & VARIABLES --- */
-        :root {
-            --bg: #030712;
-            --card: #111827;
-            --border: #374151;
-            --primary: #8b5cf6;
-            --primary-glow: rgba(139, 92, 246, 0.5);
-            --text: #f3f4f6;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-
-        /* --- IFRAME FULLSCREEN (When Viewing Site) --- */
-        #site-viewer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            border: none; background: #fff; z-index: 9999; display: none;
-        }
-
-        /* --- DASHBOARD UI --- */
-        .app-container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; height: 100vh; }
+        :root { --bg: #0f172a; --panel: #1e293b; --primary: #38bdf8; --text: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        header { 
-            display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border);
-        }
-        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; background: linear-gradient(to right, #c084fc, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        .main-editor {
-            flex: 1; display: flex; gap: 20px; margin-top: 20px;
-        }
-        @media(max-width: 768px) { .main-editor { flex-direction: column; } }
-
-        .editor-box {
-            flex: 1; display: flex; flex-direction: column;
-            background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px;
-        }
-
-        .label-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; color: #9ca3af; font-weight: 600; }
-
+        /* EDITOR SCREEN */
+        #dashboard { padding: 20px; height: 100%; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 100%; }
+        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        h1 { font-size: 1.5rem; color: var(--primary); }
+        
         textarea {
-            width: 100%; flex: 1; background: #000; border: 1px solid var(--border); 
-            color: #a5f3fc; font-family: 'JetBrains Mono', monospace; padding: 15px;
-            border-radius: 8px; resize: none; font-size: 14px; line-height: 1.5;
+            flex: 1; background: #000; color: #4ade80; border: 1px solid #334155; 
+            padding: 15px; border-radius: 8px; resize: none; font-family: monospace; font-size: 14px;
         }
-        textarea:focus { border-color: var(--primary); }
-
-        .controls {
-            width: 300px; display: flex; flex-direction: column; gap: 15px;
-        }
-        @media(max-width: 768px) { .controls { width: 100%; } }
-
-        .control-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
-        }
-
-        h3 { font-size: 1.1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-
-        .btn {
-            width: 100%; padding: 12px; border: none; border-radius: 8px; 
-            font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.2s; font-size: 1rem; margin-bottom: 10px;
-        }
-
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 0 15px var(--primary-glow); }
-        .btn-primary:hover { transform: translateY(-2px); }
         
-        .btn-copy { background: #374151; color: white; }
-        .btn-copy:hover { background: #4b5563; }
-
-        .generated-link-box {
-            background: #000; padding: 10px; border-radius: 6px; border: 1px solid var(--border);
-            word-break: break-all; font-family: monospace; font-size: 0.8rem; color: #6ee7b7;
-            max-height: 100px; overflow-y: auto; display: none;
+        .controls { margin-top: 15px; display: grid; gap: 10px; }
+        button {
+            padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-gen { background: var(--primary); color: #000; }
+        .btn-copy { background: #475569; color: #fff; display: none; } /* Hidden initially */
+        
+        /* VIEWER SCREEN (Iframe) */
+        #viewer-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: none; }
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        #edit-btn {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            background: #000; color: #fff; padding: 10px 20px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none;
         }
 
-        .warning {
-            font-size: 0.75rem; color: #f87171; margin-top: 10px; line-height: 1.4;
-            background: rgba(239,68,68,0.1); padding: 10px; border-radius: 6px;
-        }
-
+        .status { font-size: 0.8rem; margin-top: 5px; color: #ef4444; text-align: center; height: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- IFRAME FOR VIEWING (Hidden by default) -->
-    <iframe id="site-viewer"></iframe>
-
-    <!-- DASHBOARD (Visible by default) -->
-    <div class="app-container" id="dashboard">
+    <!-- DASHBOARD -->
+    <div id="dashboard">
         <header>
-            <div class="logo"><i class="fas fa-bolt"></i> NEXUS HOST</div>
-            <div style="font-size: 0.8rem; color: #9ca3af;">v4.0 Permanent Edition</div>
+            <h1><i class="fas fa-cube"></i> NexusHost</h1>
+            <span style="font-size:0.8rem; opacity:0.7">Titanium v5.0</span>
         </header>
 
-        <div class="main-editor">
-            <!-- Code Input -->
-            <div class="editor-box">
-                <div class="label-row">
-                    <span><i class="fas fa-code"></i> HTML SOURCE CODE</span>
-                    <span style="cursor:pointer" onclick="loadTemplate()">[Load Template]</span>
-                </div>
-                <textarea id="source-code" placeholder="<html><body><h1>Hello World</h1></body></html>" spellcheck="false"></textarea>
-            </div>
+        <textarea id="code" placeholder="Paste your HTML code here..." spellcheck="false"></textarea>
+        <div class="status" id="status-msg"></div>
 
-            <!-- Controls -->
-            <div class="controls">
-                <div class="control-card">
-                    <h3><i class="fas fa-rocket"></i> Deploy</h3>
-                    <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 15px;">
-                        This will generate a "Magic Link". The code is stored inside the URL itself. It will never delete.
-                    </p>
-                    <button class="btn btn-primary" onclick="generateLink()">
-                        Generate Magic Link
-                    </button>
-                    
-                    <div id="result-area" style="display:none;">
-                        <div class="generated-link-box" id="final-link"></div>
-                        <button class="btn btn-copy" onclick="copyLink()" style="margin-top:10px;">
-                            <i class="fas fa-copy"></i> Copy URL
-                        </button>
-                        <button class="btn btn-copy" onclick="openLink()" style="margin-top:5px; background: #059669;">
-                            <i class="fas fa-external-link-alt"></i> Open Site
-                        </button>
-                    </div>
-
-                    <div class="warning">
-                        <i class="fas fa-exclamation-triangle"></i> <b>Note:</b> Since we aren't using a database, keep your code mostly Text/CSS. Very large images might make the link too long to share.
-                    </div>
-                </div>
-            </div>
+        <div class="controls">
+            <button class="btn-gen" onclick="generateHashLink()">
+                <i class="fas fa-bolt"></i> Generate Secure Link
+            </button>
+            <button id="copy-btn" class="btn-copy" onclick="copyToClipboard()">
+                <i class="fas fa-copy"></i> Copy Link
+            </button>
+            <button id="open-btn" class="btn-copy" onclick="openLive()" style="background:#22c55e">
+                <i class="fas fa-external-link-alt"></i> Open Site
+            </button>
         </div>
     </div>
 
+    <!-- VIEWER -->
+    <div id="viewer-container">
+        <iframe id="site-frame"></iframe>
+        <button id="edit-btn" onclick="goHome()">✏️ Edit Code</button>
+    </div>
+
     <script>
-        // --- 1. MAGIC LINK DECODER (Runs on Page Load) ---
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data');
-
-            if (encodedData) {
-                // If 'data' exists in URL, we are in VIEW MODE
-                showSite(encodedData);
+        // --- 1. INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check if there is a Hash (#) in the URL
+            if (window.location.hash && window.location.hash.length > 10) {
+                renderSite();
             } else {
-                // If no 'data', we are in DASHBOARD MODE
-                document.getElementById('dashboard').style.display = 'flex';
-                // Load last draft
-                const saved = localStorage.getItem('nexus_draft');
-                if(saved) document.getElementById('source-code').value = saved;
+                // Restore draft if exists
+                const draft = localStorage.getItem('nexus_draft');
+                if(draft) document.getElementById('code').value = draft;
             }
-        };
+        });
 
-        // --- 2. RENDER THE SITE ---
-        function showSite(base64Code) {
-            try {
-                // Hide Dashboard
-                document.getElementById('dashboard').style.display = 'none';
-                
-                // Decode the URL data
-                const decodedHtml = decodeURIComponent(escape(window.atob(base64Code)));
-
-                // Show Iframe
-                const viewer = document.getElementById('site-viewer');
-                viewer.style.display = 'block';
-                
-                // Write content to Iframe
-                const doc = viewer.contentWindow.document;
-                doc.open();
-                doc.write(decodedHtml);
-                doc.close();
-
-                // Add a floating "Edit" button
-                const btn = document.createElement('button');
-                btn.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit This Site';
-                Object.assign(btn.style, {
-                    position: 'fixed', bottom: '20px', right: '20px',
-                    padding: '10px 20px', background: '#000', color: '#fff',
-                    border: '1px solid #333', borderRadius: '30px', cursor: 'pointer', zIndex: '10000'
-                });
-                btn.onclick = () => { window.location.href = window.location.pathname; }; // Go back to root
-                document.body.appendChild(btn);
-
-            } catch (e) {
-                alert("Error loading site: Link might be broken.");
+        // Listen for hash changes (if user clicks back button)
+        window.addEventListener('hashchange', () => {
+            if(!window.location.hash) {
+                document.getElementById('viewer-container').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
             }
-        }
+        });
 
-        // --- 3. GENERATE THE LINK ---
-        function generateLink() {
-            const code = document.getElementById('source-code').value;
-            if(!code.trim()) { alert("Please enter some HTML code first!"); return; }
+        // --- 2. GENERATE LINK (New Hash Method) ---
+        function generateHashLink() {
+            const code = document.getElementById('code').value;
+            const status = document.getElementById('status-msg');
 
-            // Save draft locally
+            if (!code.trim()) {
+                status.innerText = "Error: Code cannot be empty.";
+                return;
+            }
+
+            // Save draft
             localStorage.setItem('nexus_draft', code);
 
             try {
-                // Compress/Encode logic: UTF-8 -> Base64
-                const encoded = window.btoa(unescape(encodeURIComponent(code)));
+                // UTF-8 to Base64 (Safe Method)
+                const base64 = btoa(unescape(encodeURIComponent(code)));
                 
-                // Create full URL
-                const baseUrl = window.location.origin + window.location.pathname;
-                const magicUrl = `${baseUrl}?data=${encoded}`;
+                // Update URL with Hash (Browser won't send this to server, avoiding 414 errors)
+                const newUrl = `${window.location.origin}${window.location.pathname}#${base64}`;
+                
+                // Show Buttons
+                document.getElementById('copy-btn').style.display = 'flex';
+                document.getElementById('open-btn').style.display = 'flex';
+                status.style.color = '#4ade80';
+                status.innerText = "Link Generated! Use 'Copy Link' button.";
+                
+                // Store globally for copy button
+                window.generatedUrl = newUrl;
 
-                // Update UI
-                document.getElementById('result-area').style.display = 'block';
-                document.getElementById('final-link').innerText = magicUrl;
+            } catch (err) {
+                status.style.color = '#ef4444';
+                status.innerText = "Error: Code is too large or contains invalid characters.";
+            }
+        }
+
+        // --- 3. RENDER SITE ---
+        function renderSite() {
+            try {
+                // Remove the '#' from the start
+                const hash = window.location.hash.substring(1); 
+                
+                // Decode
+                const htmlContent = decodeURIComponent(escape(atob(hash)));
+
+                // Hide Dashboard, Show Viewer
+                document.getElementById('dashboard').style.display = 'none';
+                const container = document.getElementById('viewer-container');
+                container.style.display = 'block';
+                document.getElementById('edit-btn').style.display = 'block';
+
+                // Inject Code
+                const frame = document.getElementById('site-frame');
+                const doc = frame.contentWindow.document;
+                doc.open();
+                doc.write(htmlContent);
+                doc.close();
 
             } catch (e) {
-                alert("Code is too large for a URL! Try reducing image sizes.");
+                alert("Link broken or incomplete. Please recopy the full link.");
+                window.location.hash = ""; // Reset
             }
         }
 
         // --- 4. UTILITIES ---
-        function copyLink() {
-            const link = document.getElementById('final-link').innerText;
-            navigator.clipboard.writeText(link).then(() => alert("Link Copied!"));
+        function copyToClipboard() {
+            if(window.generatedUrl) {
+                navigator.clipboard.writeText(window.generatedUrl).then(() => {
+                    alert("Link Copied! Share this with anyone.");
+                });
+            }
         }
 
-        function openLink() {
-            const link = document.getElementById('final-link').innerText;
-            window.open(link, '_blank');
+        function openLive() {
+            if(window.generatedUrl) {
+                window.open(window.generatedUrl, '_blank');
+            }
         }
 
-        function loadTemplate() {
-            const tpl = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<style>
-  body { background: #0f172a; color: white; font-family: sans-serif; display: grid; place-items: center; height: 100vh; margin: 0; }
-  .box { padding: 40px; background: #1e293b; border-radius: 15px; text-align: center; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  h1 { color: #38bdf8; margin: 0; }
-  p { color: #94a3b8; }
-  button { margin-top: 20px; padding: 10px 20px; background: #38bdf8; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-  button:hover { background: #0ea5e9; }
-</style>
-</head>
-<body>
-  <div class="box">
-    <h1>It Works!</h1>
-    <p>This site is hosted inside the URL.</p>
-    <button onclick="alert('Hello!')">Click Me</button>
-  </div>
-</body>
-</html>`;
-            document.getElementById('source-code').value = tpl;
+        function goHome() {
+            // Clears hash and reloads dashboard
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+            document.getElementById('viewer-container').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
         }
     </script>
 </body>
