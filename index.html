@@ -3,250 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusHost | Nano Edition</title>
+    <title>NexusHost | Custom Name Edition</title>
     
     <!-- Libraries -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 
     <style>
-        :root { --bg: #000000; --panel: #111; --accent: #00ffa3; --text: #eee; --border: #333; }
+        :root {
+            --bg: #0f172a; --card: #1e293b; --primary: #6366f1; --text: #f8fafc; --border: #334155;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
         
         body {
-            background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif;
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* NAVBAR */
-        .nav {
-            padding: 15px 20px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; background: var(--panel);
+        /* --- EDITOR SCREEN --- */
+        #editor-screen {
+            display: flex; flex-direction: column; height: 100%; max-width: 1000px; margin: 0 auto; width: 100%; padding: 15px;
         }
-        .logo { font-weight: 700; color: var(--accent); letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+
+        header {
+            display: flex; align-items: center; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px;
+        }
+        .logo { font-weight: 700; font-size: 1.2rem; color: var(--primary); display: flex; gap: 8px; align-items: center; }
+
+        /* INPUT GROUPS */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
         
-        /* WORKSPACE */
-        .workspace { flex: 1; display: flex; height: 100%; }
-        
-        .editor-area { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+        input[type="text"] {
+            width: 100%; background: #000; border: 1px solid var(--border); color: #fff;
+            padding: 12px; border-radius: 8px; font-family: 'Outfit', sans-serif;
+        }
         
         textarea {
-            flex: 1; background: #050505; color: #a5b4fc; border: none; padding: 20px;
-            font-family: 'Fira Code', monospace; font-size: 14px; resize: none;
+            flex: 1; width: 100%; background: #000; border: 1px solid var(--border); color: #a5b4fc;
+            padding: 15px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; resize: none;
         }
+        
+        input:focus, textarea:focus { border-color: var(--primary); }
 
-        /* CONTROLS */
-        .controls {
-            padding: 15px; background: var(--panel); border-top: 1px solid var(--border);
-            display: flex; gap: 10px; align-items: center;
-        }
-
+        /* BUTTONS */
+        .controls { display: flex; gap: 10px; margin-top: 15px; }
         .btn {
-            padding: 10px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+            flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
         }
-        .btn-magic { background: var(--accent); color: #000; }
-        .btn-magic:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 255, 163, 0.4); }
-        
-        .btn-secondary { background: #333; color: white; }
-        .btn-secondary:hover { background: #444; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: var(--card); color: white; border: 1px solid var(--border); }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-        /* RESULT BOX */
-        .result-overlay {
+        /* --- VIEWER (IFRAME) --- */
+        #viewer-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000; display: none;
-            justify-content: center; align-items: center; flex-direction: column;
+            background: white; z-index: 1000; display: none;
         }
-        .result-card {
-            background: var(--panel); border: 1px solid var(--accent); padding: 30px;
-            border-radius: 12px; width: 90%; max-width: 500px; text-align: center;
-        }
-        .short-link-box {
-            background: #000; padding: 15px; border-radius: 6px; border: 1px dashed #555;
-            color: var(--accent); font-family: monospace; font-size: 1.2rem; margin: 20px 0;
-            word-break: break-all;
-        }
+        iframe { width: 100%; height: 100%; border: none; }
         
-        /* VIEWER */
-        #viewer-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 1000; display: none; border:none; }
-        .edit-fab { 
-            position: fixed; bottom: 20px; right: 20px; z-index: 1100; background: #000; color: #fff; 
-            padding: 10px 20px; border-radius: 30px; border: 1px solid #444; cursor: pointer; display: none;
+        #edit-fab {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1100;
+            background: #000; color: #fff; padding: 10px 20px; border-radius: 30px;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none;
         }
 
-        /* LOADER */
-        .loader { border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; display: none;
+            justify-content: center; align-items: center;
+        }
+        .modal {
+            background: var(--card); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px;
+            text-align: center; border: 1px solid var(--border);
+        }
+        .link-box {
+            background: #000; padding: 10px; border-radius: 6px; color: var(--primary);
+            font-family: monospace; word-break: break-all; margin: 15px 0; font-size: 0.9rem;
+        }
+        .loader {
+            width: 20px; height: 20px; border: 3px solid #FFF; border-bottom-color: transparent;
+            border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <div class="nav">
-        <div class="logo"><i class="fas fa-bolt"></i> NEXUS NANO</div>
-        <div style="font-size: 0.8rem; color: #777;">Auto-Shortener Included</div>
-    </div>
+    <!-- EDITOR UI -->
+    <div id="editor-screen">
+        <header>
+            <div class="logo"><i class="fas fa-server"></i> NEXUS HOST</div>
+            <div style="font-size: 0.75rem; color: #64748b;">v9.0 Custom</div>
+        </header>
 
-    <!-- MAIN EDITOR -->
-    <div class="workspace" id="main-ui">
-        <div class="editor-area">
-            <textarea id="editor" placeholder="Paste your HTML code here..." spellcheck="false"></textarea>
-            <div class="controls">
-                <button class="btn btn-magic" onclick="processLink()">
-                    <i class="fas fa-link"></i> Make Short Link
-                    <div class="loader" id="loader"></div>
-                </button>
-                <button class="btn btn-secondary" onclick="previewLocally()">
-                    <i class="fas fa-eye"></i> Preview
-                </button>
-                <button class="btn btn-secondary" onclick="loadDemo()">Template</button>
-            </div>
+        <!-- 1. Custom Name Input -->
+        <div class="input-group">
+            <label>WEBSITE NAME (For URL & Title)</label>
+            <input type="text" id="site-name" placeholder="e.g. My-Cool-Game" autocomplete="off">
         </div>
-    </div>
 
-    <!-- RESULT POPUP -->
-    <div class="result-overlay" id="result-modal">
-        <div class="result-card">
-            <h2 style="color: white; margin-bottom: 10px;">Link Ready! 🎉</h2>
-            <p style="color: #999; font-size: 0.9rem;">Here is your short permanent link:</p>
-            
-            <div class="short-link-box" id="final-link">Generating...</div>
-            
-            <button class="btn btn-magic" style="width: 100%; justify-content: center;" onclick="copyShortLink()">
-                <i class="fas fa-copy"></i> Copy Link
+        <!-- 2. Code Input -->
+        <div class="input-group" style="flex: 1; display: flex; flex-direction: column;">
+            <label>SOURCE CODE (HTML)</label>
+            <textarea id="code-editor" placeholder="<html>...Paste here...</html>" spellcheck="false"></textarea>
+        </div>
+
+        <!-- 3. Action Buttons -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="generateCustomLink()">
+                <i class="fas fa-bolt"></i> Generate Short Link
             </button>
-            <button class="btn btn-secondary" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="closeModal()">
-                Close
+            <button class="btn btn-secondary" onclick="previewSite()">
+                <i class="fas fa-play"></i> Preview
             </button>
         </div>
     </div>
 
-    <!-- VIEWER IFRAME -->
-    <iframe id="viewer-frame"></iframe>
-    <button class="edit-fab" id="edit-btn" onclick="closePreview()">✏️ Edit Code</button>
+    <!-- SHARE MODAL -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <h3 style="margin-bottom: 10px;">Link Ready! 🚀</h3>
+            <p style="font-size: 0.85rem; color: #94a3b8;">Your custom name site is live.</p>
+            
+            <div class="link-box" id="short-link">Generating...</div>
+            
+            <button class="btn btn-primary" onclick="copyLink()">Copy Link</button>
+            <button class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- VIEWER UI -->
+    <div id="viewer-container">
+        <iframe id="site-frame"></iframe>
+        <button id="edit-fab" onclick="closeViewer()"><i class="fas fa-pen"></i> Edit</button>
+    </div>
 
     <script>
-        // --- 1. INITIALIZATION ---
-        const editor = document.getElementById('editor');
-        
+        // --- ON LOAD ---
         window.onload = function() {
-            // Check if opening a link
-            if(window.location.hash.length > 5) {
-                const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(window.location.search);
+            const siteName = params.get('site'); // Check for ?site=Name
+            const hash = window.location.hash.substring(1);
+
+            if (hash) {
+                // VIEW MODE
+                // 1. Set Title to Custom Name
+                if(siteName) {
+                    document.title = siteName; 
+                }
+                // 2. Render Site
                 try {
                     const content = LZString.decompressFromEncodedURIComponent(hash);
-                    if(content) showSite(content);
+                    if(content) showViewer(content);
                 } catch(e) {}
             } else {
-                // Load Draft
-                const draft = localStorage.getItem('nexus_nano');
-                if(draft) editor.value = draft;
+                // EDIT MODE - Load Draft
+                const draft = localStorage.getItem('nexus_draft_v9');
+                if(draft) document.getElementById('code-editor').value = draft;
             }
-        }
+        };
 
-        // --- 2. THE SHORTENER LOGIC (API) ---
-        async function processLink() {
-            const code = editor.value;
-            if(!code.trim()) { alert("Code is empty!"); return; }
+        // --- GENERATE LINK ---
+        async function generateCustomLink() {
+            const nameInput = document.getElementById('site-name').value.trim();
+            const code = document.getElementById('code-editor').value;
 
-            // UI Updates
-            const loader = document.getElementById('loader');
-            const btnText = document.querySelector('.btn-magic');
-            loader.style.display = 'block';
+            if(!code) { alert("Code is empty!"); return; }
             
-            // 1. Compress Code
+            // Default name if empty
+            const safeName = nameInput ? nameInput.replace(/[^a-zA-Z0-9-_]/g, '-') : "My-Site";
+            
+            // Show Loader
+            const modal = document.getElementById('modal');
+            const linkBox = document.getElementById('short-link');
+            modal.style.display = 'flex';
+            linkBox.innerHTML = '<span class="loader"></span>';
+
+            // 1. Create Long URL with ?site=NAME parameter
             const compressed = LZString.compressToEncodedURIComponent(code);
-            const longUrl = window.location.origin + window.location.pathname + "#" + compressed;
+            // This structure: domain.com/?site=Name#code
+            const longUrl = `${window.location.origin}${window.location.pathname}?site=${safeName}#${compressed}`;
 
-            // 2. Call TinyURL API (via Proxy to bypass CORS)
-            // Note: We use allorigins.win to allow the request from browser
-            const tinyUrlApi = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`;
-            const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(tinyUrlApi)}`;
-
+            // 2. Shorten with TinyURL
             try {
-                // Attempt to fetch short link
-                let response = await fetch(proxy);
-                if (!response.ok) throw new Error('Network response was not ok');
+                const apiUrl = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`;
+                // Using proxy to avoid CORS
+                const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`);
                 
-                let shortLink = await response.text();
+                if(!response.ok) throw new Error("API Failed");
                 
-                // Show Result
-                showModal(shortLink);
-                localStorage.setItem('nexus_nano', code); // Save Draft
+                const shortUrl = await response.text();
+                linkBox.innerText = shortUrl;
+                
+                // Save Draft
+                localStorage.setItem('nexus_draft_v9', code);
 
-            } catch (error) {
-                // If API fails (maybe code too HUGE), fallback to Long URL
-                alert("Code is too large for TinyURL! Giving you the long secure link instead.");
-                showModal(longUrl);
-            } finally {
-                loader.style.display = 'none';
+            } catch (e) {
+                // Fallback if shortener fails
+                linkBox.innerText = "Error shortening. Copy long link from address bar after preview.";
+                alert("Could not shorten link (Code too big).");
+                modal.style.display = 'none';
             }
         }
 
-        // --- 3. UI FUNCTIONS ---
-        function showModal(link) {
-            document.getElementById('result-modal').style.display = 'flex';
-            document.getElementById('final-link').innerText = link;
+        // --- PREVIEW ---
+        function previewSite() {
+            const code = document.getElementById('code-editor').value;
+            const name = document.getElementById('site-name').value || "Preview";
+            document.title = name; // Update Browser Tab Name
+            showViewer(code);
         }
 
-        function closeModal() {
-            document.getElementById('result-modal').style.display = 'none';
-        }
+        function showViewer(content) {
+            document.getElementById('editor-screen').style.display = 'none';
+            const container = document.getElementById('viewer-container');
+            container.style.display = 'block';
+            document.getElementById('edit-fab').style.display = 'block';
 
-        function copyShortLink() {
-            const txt = document.getElementById('final-link').innerText;
-            navigator.clipboard.writeText(txt).then(() => alert("Copied!"));
-        }
-
-        // --- 4. PREVIEW FUNCTIONS ---
-        function previewLocally() {
-            const code = editor.value;
-            showSite(code);
-        }
-
-        function showSite(content) {
-            document.getElementById('main-ui').style.display = 'none';
-            document.getElementById('viewer-frame').style.display = 'block';
-            document.getElementById('edit-btn').style.display = 'block';
-            
-            const doc = document.getElementById('viewer-frame').contentWindow.document;
+            const doc = document.getElementById('site-frame').contentWindow.document;
             doc.open();
             doc.write(content);
             doc.close();
         }
 
-        function closePreview() {
-            // If viewing a hash url, clear hash so we can edit
-            if(window.location.hash) {
-                history.pushState("", document.title, window.location.pathname + window.location.search);
-                location.reload();
-            } else {
-                document.getElementById('main-ui').style.display = 'flex';
-                document.getElementById('viewer-frame').style.display = 'none';
-                document.getElementById('edit-btn').style.display = 'none';
-            }
+        function closeViewer() {
+            // Reset URL clean
+            history.pushState("", document.title, window.location.pathname);
+            window.location.reload();
         }
 
-        function loadDemo() {
-            editor.value = `<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body { background: #111; color: white; display: grid; place-items: center; height: 100vh; font-family: sans-serif; margin: 0;}
-  .box { padding: 30px; border: 2px solid #00ffa3; border-radius: 10px; text-align: center; }
-  h1 { color: #00ffa3; }
-</style>
-</head>
-<body>
-  <div class="box">
-    <h1>It Works!</h1>
-    <p>This is a short link website.</p>
-  </div>
-</body>
-</html>`;
+        // --- UTILS ---
+        function copyLink() {
+            const txt = document.getElementById('short-link').innerText;
+            navigator.clipboard.writeText(txt).then(() => alert("Copied!"));
         }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
     </script>
 </body>
 </html>
