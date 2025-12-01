@@ -2,173 +2,186 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusHost | Clean Link</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NexusHost | Mobile Pro</title>
     
-    <!-- External Tools -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 
     <style>
-        :root { --bg: #000; --panel: #111; --primary: #fff; --accent: #3b82f6; --border: #333; }
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        :root { --bg: #09090b; --panel: #18181b; --primary: #3b82f6; --text: #fff; --border: #27272a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); color: var(--primary); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body {
+            background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+        }
 
         /* --- EDITOR UI --- */
-        #app-ui { display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto; width: 100%; padding: 15px; }
+        #app-ui {
+            display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto; width: 100%; padding: 20px;
+            overflow-y: auto; padding-bottom: 100px; /* Space for floating button */
+        }
 
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
-        .brand { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
-        .brand span { color: var(--accent); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .brand { font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px; }
+        .brand span { color: var(--primary); }
 
-        .input-box { margin-bottom: 15px; }
-        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
+        .input-box { margin-bottom: 20px; }
+        label { display: block; font-size: 0.8rem; color: #a1a1aa; margin-bottom: 8px; font-weight: 600; }
         
         input, textarea {
             width: 100%; background: var(--panel); border: 1px solid var(--border); color: #fff;
-            padding: 12px; border-radius: 6px; font-family: 'Inter', sans-serif; transition: 0.2s;
+            padding: 14px; border-radius: 8px; font-family: 'Inter', sans-serif; transition: 0.2s; font-size: 1rem;
         }
-        textarea { height: 300px; font-family: 'Fira Code', monospace; font-size: 13px; resize: none; }
-        input:focus, textarea:focus { border-color: var(--accent); }
+        
+        /* Code Editor Style */
+        textarea {
+            height: 350px; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.5; resize: none;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); }
 
+        /* --- BUTTONS --- */
         .btn {
-            width: 100%; padding: 14px; background: var(--primary); color: #000; border: none;
-            border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 15px; background: #222; color: #fff; border: 1px solid #333;
+            border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 10px;
         }
-        .btn:hover { background: #e5e5e5; }
+        
+        /* FLOATING CREATE BUTTON (NICHE WALA BUTTON) */
+        .fab-create {
+            position: fixed; bottom: 25px; right: 25px;
+            background: var(--primary); color: white;
+            padding: 15px 25px; border-radius: 50px;
+            font-weight: 700; font-size: 1rem;
+            border: none; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            display: flex; align-items: center; gap: 10px;
+            z-index: 500; cursor: pointer; transition: transform 0.2s;
+        }
+        .fab-create:active { transform: scale(0.95); }
 
-        /* --- VIEWER UI (Full Screen) --- */
+        /* --- VIEWER UI --- */
         #viewer-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: none; }
         iframe { width: 100%; height: 100%; border: none; }
         
         #back-btn {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background: #000; color: #fff; padding: 10px 20px; border-radius: 30px; 
-            font-size: 0.9rem; cursor: pointer; border: 1px solid #333; display: none;
+            position: fixed; bottom: 25px; right: 25px; z-index: 1000;
+            background: #000; color: #fff; padding: 12px 25px; border-radius: 30px; 
+            font-weight:600; cursor: pointer; border: 1px solid #333; display: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         /* --- MODAL --- */
-        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal { background: #111; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #333; }
-        .link-display { background: #000; color: var(--accent); padding: 10px; border-radius: 4px; font-family: monospace; word-break: break-all; margin: 15px 0; font-size: 0.85rem; border: 1px dashed #444; }
+        .link-display { background: #000; color: var(--primary); padding: 12px; border-radius: 6px; font-family: monospace; word-break: break-all; margin: 15px 0; font-size: 0.9rem; border: 1px dashed #444; }
+        
+        .btn-modal { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- EDITOR (Ye wo hissa hai jahan code likhenge) -->
+    <!-- EDITOR -->
     <div id="app-ui">
         <div class="header">
             <div class="brand">NEXUS<span>HOST</span></div>
-            <div style="font-size:0.75rem; color:#666">v10.0</div>
         </div>
 
         <div class="input-box">
-            <label>Website Name (Link mein ye dikhega)</label>
-            <input type="text" id="site-name" placeholder="e.g. pubg-tournament" onkeyup="cleanName(this)">
+            <label>WEBSITE NAME (For URL)</label>
+            <input type="text" id="site-name" placeholder="e.g. Free-Fire-Mod" onkeyup="cleanName(this)">
         </div>
 
         <div class="input-box" style="flex:1">
-            <label>HTML Code</label>
-            <textarea id="code" placeholder="Paste HTML here..." spellcheck="false"></textarea>
+            <label>PASTE HTML CODE</label>
+            <textarea id="code" placeholder="<html>...</html>" spellcheck="false"></textarea>
+            
+            <!-- BUTTON 1: Normal wala -->
+            <button class="btn" onclick="generateCleanLink()">
+                <i class="fas fa-bolt"></i> Generate Link Here
+            </button>
         </div>
-
-        <button class="btn" onclick="generateCleanLink()">
-            <i class="fas fa-bolt"></i> Generate Link
-        </button>
     </div>
 
-    <!-- VIEWER (Ye wo hissa hai jo link kholne par dikhega) -->
+    <!-- BUTTON 2: Floating Button (Niche wala) -->
+    <button class="fab-create" onclick="generateCleanLink()">
+        <i class="fas fa-paper-plane"></i> CREATE LINK
+    </button>
+
+    <!-- VIEWER -->
     <div id="viewer-ui">
         <iframe id="frame"></iframe>
-        <button id="back-btn" onclick="goBack()">✏️ Edit Code</button>
+        <button id="back-btn" onclick="goBack()"><i class="fas fa-pen"></i> Edit</button>
     </div>
 
-    <!-- MODAL (Link Copy Karne ke liye) -->
+    <!-- MODAL -->
     <div class="modal-bg" id="modal">
         <div class="modal">
-            <h3 style="margin-bottom:10px">Link Generated!</h3>
-            <div class="link-display" id="final-link">...</div>
-            <button class="btn" onclick="copyLink()">Copy Link</button>
-            <button class="btn" style="margin-top:10px; background:#222; color:#fff" onclick="closeModal()">Close</button>
+            <h3 style="margin-bottom:10px; color:white;">Link Ready! 🚀</h3>
+            <div class="link-display" id="final-link">Generating...</div>
+            <button class="btn-modal" onclick="copyLink()">Copy Link</button>
+            <button class="btn-modal" style="margin-top:10px; background:#222;" onclick="closeModal()">Close</button>
         </div>
     </div>
 
     <script>
-        // 1. PAGE LOAD LOGIC
+        // --- LOGIC ---
         window.onload = function() {
-            // URL check karein: Kya ye Editor hai ya Viewer?
             const params = new URLSearchParams(window.location.search);
-            const siteName = params.get('site'); // ?site=Name ko pakdo
+            const siteName = params.get('site'); 
 
             if (siteName && window.location.hash.length > 5) {
-                // Agar URL mein ?site= hai, to VIEW MODE chalao
                 openViewer(siteName);
             } else {
-                // Agar nahi hai, to EDITOR MODE chalao
-                const draft = localStorage.getItem('nexus_v10');
+                const draft = localStorage.getItem('nexus_draft');
                 if(draft) document.getElementById('code').value = draft;
             }
         };
 
-        // 2. LINK GENERATOR (Safai ke saath)
         function generateCleanLink() {
             const nameInput = document.getElementById('site-name').value.trim();
             const code = document.getElementById('code').value;
 
-            if(!code) { alert("Code to likho bhai!"); return; }
-            if(!nameInput) { alert("Website ka naam likhna zaroori hai."); return; }
+            if(!code) { alert("Please enter HTML code!"); return; }
+            if(!nameInput) { alert("Please enter a Website Name!"); return; }
 
-            // Code Compress karo
+            // Compress & Create URL
             const compressed = LZString.compressToEncodedURIComponent(code);
-            
-            // Clean URL banao (No /view.html, No //)
-            // Logic: Current Domain + /?site=Name + #Code
             const cleanUrl = `${window.location.origin}/?site=${nameInput}#${compressed}`;
 
             // Show Result
             document.getElementById('modal').style.display = 'flex';
             document.getElementById('final-link').innerText = cleanUrl;
             
-            localStorage.setItem('nexus_v10', code);
+            localStorage.setItem('nexus_draft', code);
         }
 
-        // 3. VIEWER LOGIC
         function openViewer(name) {
-            // UI Switch
             document.getElementById('app-ui').style.display = 'none';
+            document.querySelector('.fab-create').style.display = 'none'; // Hide FAB in view mode
             document.getElementById('viewer-ui').style.display = 'block';
             document.getElementById('back-btn').style.display = 'block';
-
-            // Title Change
             document.title = name;
 
-            // Decompress Code
             try {
                 const hash = window.location.hash.substring(1);
                 const content = LZString.decompressFromEncodedURIComponent(hash);
-                
                 if(content) {
                     const doc = document.getElementById('frame').contentWindow.document;
-                    doc.open();
-                    doc.write(content);
-                    doc.close();
+                    doc.open(); doc.write(content); doc.close();
                 }
-            } catch(e) {
-                alert("Link broken hai.");
-            }
+            } catch(e) { alert("Link Error"); }
         }
 
-        // 4. UTILITIES
         function cleanName(input) {
-            // Sirf English letters aur numbers allow karo, space ko '-' bana do
             input.value = input.value.replace(/ /g, "-").replace(/[^a-zA-Z0-9-]/g, "");
         }
 
         function copyLink() {
             const txt = document.getElementById('final-link').innerText;
-            navigator.clipboard.writeText(txt).then(() => alert("Link Copy Ho Gaya!"));
+            navigator.clipboard.writeText(txt).then(() => alert("Copied!"));
         }
 
         function closeModal() {
@@ -176,7 +189,6 @@
         }
 
         function goBack() {
-            // Wapas Editor pe jao, URL clean karo
             window.history.pushState({}, document.title, window.location.origin);
             window.location.reload();
         }
